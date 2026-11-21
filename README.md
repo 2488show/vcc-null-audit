@@ -3,8 +3,8 @@
 **Empirical null distributions and an adversarial audit of the metrics used to score
 single-cell perturbation-prediction models (Arc Institute Virtual Cell Challenge).**
 
-> Status: **work in progress** — stage 0 (data checks and the null distribution) is done;
-> the metric audit is next. Numbers below are from the public 2025 training split.
+> Status: **work in progress** — stage 0 (data checks, null distribution) and the first
+> round of the metric audit are done; sensitivity checks are running.
 
 ## The question
 
@@ -64,6 +64,34 @@ three splits contains ribosome, Pol II, proteasome or Integrator targets.
 The three released files share **the same 38,176 control cells** (identical barcodes and
 counts). The dataset therefore has 414,694 unique cells, not the 491,046 obtained by
 adding the files.
+
+## Metric audit, round 1
+
+Eleven predictions that contain no (or the wrong) biology were scored with
+`cell-eval2 --preset vcc2026` on the official scale (0 = generic-response baseline,
+1 = split-half replicate). Reference: all 150 training perturbations, 50 cells each,
+1,000 controls — **a subsample, not the official full-data score**; single seed.
+
+| Prediction | PDS | MSE | NMAE | FIDELITY | REACH | JACCARD | AVG |
+|---|---|---|---|---|---|---|---|
+| Control bootstrap (no change) | 0.10 | 0 | −0.10 | −0.04 | −0.04 | 0.02 | −0.01 |
+| Reads thinned to 25% | 0.10 | 0 | −0.16 | **0.61** | −0.03 | −0.09 | **0.07** |
+| Multiplicative noise | −0.03 | 0 | −0.11 | **0.54** | −0.05 | −0.11 | 0.04 |
+| Real effects, shuffled labels | 0.03 | 0 | −0.09 | **0.57** | −0.10 | −0.10 | 0.05 |
+| Mean response ×1 (sanity check) | −0.01 | 0 | −0.02 | 0.04 | −0.01 | −0.08 | −0.01 |
+| Mean response ×2 | 0.05 | 0 | 0.05 | **0.36** | 0.11 | −0.13 | **0.07** |
+| Mean response + target knock-down | −0.06 | 0 | −0.04 | 0.02 | −0.05 | −0.02 | −0.02 |
+
+- **Refuted hypothesis:** knocking down the target gene from the label alone earns
+  nothing — the 2026 metrics exclude the on-target gene, as documented.
+- **FIDELITY rewards indiscriminate calling.** `direction_fidelity_yield_raw` is
+  `k / max(n_pred, n_conf)`, where `k` counts sign matches over every gene the
+  prediction calls significant (the reference only needs a non-zero log fold change)
+  and is not chance-corrected. Calling thousands of genes yields a raw value near 0.5
+  (baseline 0.03, replicate 0.82), i.e. ~0.6 on the scale.
+- **The MSE clamp hides the cost.** These predictions have 1.6–2.9× the baseline's raw
+  MSE, but the score is clamped at 0, so their average ends up positive.
+- PDS differences of ±0.1 are within sampling noise at 150 perturbations.
 
 Full notes: [`NOTES.md`](NOTES.md).
 
