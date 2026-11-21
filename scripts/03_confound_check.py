@@ -4,7 +4,8 @@ import numpy as np, pandas as pd
 from scipy.stats import spearmanr, pearsonr
 
 ROOT = Path(__file__).resolve().parents[1]
-S = ROOT/"results/stage0"
+import sys
+S = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT/"results/stage0"
 d = pd.read_csv(S/"fact3_magnitude_specificity.csv")
 
 print("=== ||δ|| 与细胞数的关系（噪声混杂检查）===")

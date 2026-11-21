@@ -4,7 +4,8 @@ from pathlib import Path
 import numpy as np, pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-S = ROOT/"results/stage0"
+import sys
+S = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT/"results/stage0"
 z = np.load(S/"group_sums.npz", allow_pickle=True)
 gene_sums, cats, genes = z["gene_sums"], list(z["cats"]), list(z["genes"])
 group_cells = z["group_cells"]

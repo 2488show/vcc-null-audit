@@ -36,6 +36,7 @@ non-targeting controls; 48 batches.
 | Targets not expressed in H1 controls | enough to build a second null | **0 of 150** — prediction void |
 | Variance explained by the shared response direction | 40–60% | **12.4%** — prediction wrong |
 | Does the empirical null remove the cell-count confound? | yes | Spearman with cell count −0.545 → **+0.074** |
+| Same, replicated on validation / test | yes | −0.610 → −0.243 (p=0.09) / −0.490 → +0.053 |
 
 Why the two predictions failed (both are part of the result):
 
@@ -56,6 +57,13 @@ Null-distribution checks:
   knockdown itself** explains it: all 150 targets are repressed (median 5.9% expression
   remaining), and the target's own gene carries a median 10% of ‖δ‖². Excluding it
   lowers the minimum to 1.04.
+
+All 300 targets across the three splits are expressed in H1 controls, and none of the
+three splits contains ribosome, Pol II, proteasome or Integrator targets.
+
+The three released files share **the same 38,176 control cells** (identical barcodes and
+counts). The dataset therefore has 414,694 unique cells, not the 491,046 obtained by
+adding the files.
 
 Full notes: [`NOTES.md`](NOTES.md).
 

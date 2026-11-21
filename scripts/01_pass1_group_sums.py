@@ -3,13 +3,14 @@
 只需一次 I/O。输出 results/stage0/group_sums.npz
 """
 from __future__ import annotations
-import time
+import sys, time
 from pathlib import Path
 import numpy as np, h5py
 
 ROOT = Path(__file__).resolve().parents[1]
-H5 = ROOT/"data/raw/adata_Training.h5ad"
-OUT = ROOT/"results/stage0"; OUT.mkdir(parents=True, exist_ok=True)
+H5 = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT/"data/raw/adata_Training.h5ad"
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT/"results/stage0"
+OUT.mkdir(parents=True, exist_ok=True)
 ROWS = 4000   # 每块细胞数
 
 t0 = time.time()
