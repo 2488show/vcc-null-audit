@@ -9,3 +9,14 @@ results/stage0/pool.npz
 results/stage0/*.npz
 results/gate/*.h5ad
 logs/
+results/s3/**/*.h5ad
+results/s3_subset/
+.venv-mac/
+.uv-cache-mac/
+results/s3/**/evaluation_results.json
+results/s3/**/run_meta.json
+results/s3/**/*.log
+results/s3/**/*progress
+results/s3/**/baseline_meta.json
+results/s3/**/anchor_meta.json
+results/s3/**/manifest.json
