@@ -1,0 +1,89 @@
+# vcc-null-audit
+
+**Empirical null distributions and an adversarial audit of the metrics used to score
+single-cell perturbation-prediction models (Arc Institute Virtual Cell Challenge).**
+
+> Status: **work in progress** — stage 0 (data checks and the null distribution) is done;
+> the metric audit is next. Numbers below are from the public 2025 training split.
+
+## The question
+
+Virtual-cell models are scored against two reference points: 0 = "predict the control
+mean", 1 = "a split-half replicate". The 0 point is a *single prediction with no
+variance*, while a real perturbation with no effect still produces a noisy measured
+change. This project asks:
+
+1. **What does "no effect" look like as a distribution?** We build an empirical null
+   from control cells, matched on cell count, and compare it to the analytic
+   noise correction that the 2026 metrics already use (`expr_mse_unbiased`).
+2. **Which official metrics can be raised by predictions that contain no biology?**
+   Seven adversarial predictions (no-change, read thinning, global-mean scaling,
+   matched noise, shuffled labels, random rotations, and "knock down only the target
+   gene") are scored with the official `cell-eval2` scorer.
+
+Prior work showed that simple baselines are hard to beat (see `Dar-kSun/baseline-first`
+and the 2026 challenge wrap-up). This project is about the *measuring stick* rather
+than the models.
+
+## Stage 0 results (2025 training split)
+
+Data: 221,273 H1 hESC cells × 18,080 genes; 150 CRISPRi targets + 38,176
+non-targeting controls; 48 batches.
+
+| Check | Pre-registered prediction | Result |
+|---|---|---|
+| Hand-computed `expr_mae` vs `cell-eval2` | match | match to 2.8e-17 |
+| Targets not expressed in H1 controls | enough to build a second null | **0 of 150** — prediction void |
+| Variance explained by the shared response direction | 40–60% | **12.4%** — prediction wrong |
+| Does the empirical null remove the cell-count confound? | yes | Spearman with cell count −0.545 → **+0.074** |
+
+Why the two predictions failed (both are part of the result):
+
+- The training split contains **no** ribosome, spliceosome, proteasome, Pol II or
+  Integrator targets, so the expected shared "growth-arrest" axis is weak by
+  construction.
+- Raw effect size mostly reflects **how many cells a perturbation has**: median ‖δ‖
+  falls from 10.25 (243 cells) to 2.76 (2,282 cells). Without the null, this would
+  have read as biology.
+
+Null-distribution checks:
+
+- Fit `null² = a/n + b`; held-out error +0.29% / −0.41%.
+- Resampling from a finite control pool inflates the null by up to **31%** at large n;
+  the fitted, theoretical and measured pool term agree and are subtracted.
+- Every perturbation sits above the null (min signal-to-noise 1.15). **Batch** was
+  ruled out (each perturbation spans a median 48/48 batches). The **on-target
+  knockdown itself** explains it: all 150 targets are repressed (median 5.9% expression
+  remaining), and the target's own gene carries a median 10% of ‖δ‖². Excluding it
+  lowers the minimum to 1.04.
+
+Full notes: [`NOTES.md`](NOTES.md).
+
+## Reproduce
+
+```bash
+uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python \
+    anndata numpy scipy pandas polars h5py cell-eval2
+# data: gs://arc-institute-virtual-cell-atlas/virtual-cell-challenge/2025/ -> data/raw/
+python scripts/00_hard_gate.py          # needs the cell-eval2 repo's 5 MB tutorial subset in vendor/
+python scripts/01_pass1_group_sums.py   # one streaming pass, ~15 s
+python scripts/02_facts_1_and_3.py
+python scripts/04_null_n2.py 160        # resumable; run again until all grid points are done
+python scripts/05_null_model.py
+python scripts/06_batch_matched.py
+python scripts/07_exclude_target.py
+```
+
+Runs in under 3 GB RAM (streaming over the 15.5 GB CSR file).
+
+## Data and tools
+
+- Roohani et al. *Virtual Cell Challenge: Toward a Turing test for the virtual cell.* Cell (2025).
+  Data via the Arc Virtual Cell Atlas.
+- `cell-eval2` (Arc Institute) — official scorer.
+- Replogle et al. *Mapping information-rich genotype-phenotype landscapes with
+  genome-scale Perturb-seq.* Cell (2022).
+
+## License
+
+MIT
