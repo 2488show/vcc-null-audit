@@ -1,0 +1,58 @@
+{
+  "anchor_metric_names": [
+    "expr_mae",
+    "pds_l1",
+    "de_wilcoxon_overlap"
+  ],
+  "anchor_semantic_identity": "71658089cc9dfa62bc001f0e19c66bb7c46fba1b2d95f26c190b3623ac086b60",
+  "cell_eval2_version": "0.22.0",
+  "comparator": "bulk_lognorm",
+  "config_digest": "ffbc7f784ac004cb9f50282fc6322b0abff3f2456b8068ce2fda42184b3d064c",
+  "created_utc": "2026-11-21T09:40:27+00:00",
+  "de_pred_fingerprint": null,
+  "de_real_fingerprint": null,
+  "environment": {
+    "anndata": {
+      "provenance": "release",
+      "version": "0.13.4"
+    },
+    "numpy": {
+      "provenance": "release",
+      "version": "2.5.5"
+    },
+    "polars": {
+      "provenance": "release",
+      "version": "2.1.0"
+    },
+    "scanpy": {
+      "provenance": "release",
+      "version": "1.12.6"
+    },
+    "scipy": {
+      "provenance": "release",
+      "version": "1.18.1"
+    }
+  },
+  "input_type_pred_effective": "counts",
+  "input_type_real_effective": "counts",
+  "metric_normalization": [
+    [
+      "expr_mae",
+      "bulk_lognorm"
+    ],
+    [
+      "pds_l1",
+      "bulk_lognorm"
+    ],
+    [
+      "de_wilcoxon_overlap",
+      null
+    ]
+  ],
+  "metrics_version": 2,
+  "resolved_de_backend": "scanpy",
+  "resolved_device": "cpu",
+  "source": "/sessions/rcw-0118euraj2yxkdpraws7wuze/mnt/Final Project/p5-vcc-null-audit/results/gate/real.h5ad",
+  "source_fingerprint": "49d986bf25bc72517063585bdaaf2f937181974941a66774443d2c90ad2e0abb",
+  "source_fingerprint_strict": false
+}

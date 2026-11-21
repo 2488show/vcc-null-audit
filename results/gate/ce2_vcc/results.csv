@@ -1,0 +1,16 @@
+perturbation,metric,value
+MED12,de_wilcoxon_overlap,0.0
+SRC,de_wilcoxon_overlap,0.0
+STAT1,de_wilcoxon_overlap,0.0
+TET1,de_wilcoxon_overlap,0.0
+TMSB4X,de_wilcoxon_overlap,0.0
+MED12,expr_mae,0.057971431801247295
+SRC,expr_mae,0.03881898256638323
+STAT1,expr_mae,0.04445629053036981
+TET1,expr_mae,0.041281198243938916
+TMSB4X,expr_mae,0.04498984308019203
+MED12,pds_l1,0.0
+SRC,pds_l1,1.0
+STAT1,pds_l1,0.5
+TET1,pds_l1,0.5
+TMSB4X,pds_l1,0.25

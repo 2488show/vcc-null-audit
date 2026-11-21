@@ -1,0 +1,11 @@
+.venv/
+.uv-cache/
+data/raw/
+__pycache__/
+*.pyc
+.env
+vendor/
+results/stage0/pool.npz
+results/stage0/*.npz
+results/gate/*.h5ad
+logs/
