@@ -19,7 +19,9 @@ H5 = ROOT/"data/raw/adata_Training.h5ad"
 REF, OUT = Path(sys.argv[1]), Path(sys.argv[2]); OUT.mkdir(parents=True, exist_ok=True)
 ALL = ["X1","X2_keep75","X2_keep50","X2_keep25","X4_gauss05","X3_a1","X3_a2","X7","X7plus","X5","X6"]
 WANT = sys.argv[3:] or ALL
-POOL, TS, KD_REMAIN, SEED = 4000, 50000.0, 0.059, 0
+import os
+POOL, TS, KD_REMAIN = 4000, 50000.0, 0.059
+SEED = int(os.environ.get("P5_SEED", "0"))
 t0 = time.time(); rng = np.random.default_rng(SEED)
 CTRL = "non-targeting"
 

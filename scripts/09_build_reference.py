@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 H5 = ROOT/"data/raw/adata_Training.h5ad"
 K, C = int(sys.argv[1]), int(sys.argv[2]); SEED = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 NPERT = int(sys.argv[4]) if len(sys.argv) > 4 else 0
-OUT = ROOT/(f"results/s3/real_K{K}_C{C}" + (f"_P{NPERT}" if NPERT else "") + ".h5ad"); OUT.parent.mkdir(parents=True, exist_ok=True)
+OUT = ROOT/(f"results/s3/real_K{K}_C{C}" + (f"_P{NPERT}" if NPERT else "") + (f"_s{SEED}" if SEED else "") + ".h5ad"); OUT.parent.mkdir(parents=True, exist_ok=True)
 t0 = time.time(); rng = np.random.default_rng(SEED)
 
 with h5py.File(H5, "r") as f:

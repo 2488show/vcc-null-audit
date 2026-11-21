@@ -92,7 +92,9 @@ Eleven predictions that contain no (or the wrong) biology were scored with
   (baseline 0.03, replicate 0.82), i.e. ~0.6 on the scale.
 - **The MSE clamp hides the cost.** These predictions have 1.6–2.9× the baseline's raw
   MSE, but the score is clamped at 0, so their average ends up positive.
-- PDS differences of ±0.1 are within sampling noise at 150 perturbations.
+- PDS and JACCARD are **not reported**: across three independent seeds, a no-change
+  prediction's PDS spans +0.10 / +0.05 / −0.20, and the junk predictions' JACCARD spans
+  0.16–0.18 — both as large as any effect they could show. See the seed table below.
 
 ### Follow-up checks
 
@@ -119,11 +121,34 @@ variant. On the same reference (median 17 significant genes per real perturbatio
 | Mean response ×1 (sanity check) | 0.04 | 0.18 | +0.01 |
 | Mean response + target knock-down | 0.02 | 0.14 | 0.00 |
 
+### Three independent seeds
+
+Each seed re-draws the reference subsample, rebuilds the scale (baseline emission seed and
+anchor split seed) and regenerates the predictions. FIDELITY, `from_replicate`:
+
+| Prediction | seed 0 | seed 1 | seed 2 | mean | range |
+|---|---|---|---|---|---|
+| Reads thinned to 25% | 0.610 | 0.632 | 0.632 | **0.62** | 0.022 |
+| Multiplicative noise | 0.542 | 0.580 | 0.571 | **0.56** | 0.038 |
+| Shuffled labels | 0.566 | 0.565 | 0.556 | **0.56** | 0.009 |
+| Mean response ×1 (sanity check) | 0.037 | 0.023 | 0.014 | 0.03 | 0.023 |
+| Mean response + target knock-down | 0.024 | 0.049 | 0.049 | 0.04 | 0.026 |
+| Control bootstrap | −0.035 | −0.004 | −0.014 | −0.02 | 0.031 |
+
+The FIDELITY result holds: 0.56–0.62 for the three junk predictions, each stable to within
+0.04 across seeds. The sanity check stays near zero all three times, and the
+target-knock-down prediction never beats the baseline (average −0.02 / −0.01 / +0.01).
+
+Average score is positive but small — about +0.03 for the junk predictions, with a
+per-prediction seed range of 0.03–0.06, so only its sign is worth reporting.
+
 Two caveats from the 200-cell run. The sanity check drifts on FIDELITY (0.18 instead of
 ~0), probably because our integer re-emission of the mean response is called significant
 more often than the official baseline's (not verified); read the two "mean response" rows
-against that offset. And the thinned and noisy predictions also beat the baseline on
-JACCARD there (+0.16), so JACCARD does not reliably offset the FIDELITY gain.
+against that offset. The thinned and noisy predictions also beat the baseline on
+JACCARD there (+0.16), but the seed table shows JACCARD moving by 0.16–0.18 on its own, so
+that reversal cannot be separated from noise — whether JACCARD offsets the FIDELITY gain is
+simply unresolved here.
 
 Full notes: [`NOTES.md`](NOTES.md).
 
