@@ -3,8 +3,9 @@
 **Empirical null distributions and an adversarial audit of the metrics used to score
 single-cell perturbation-prediction models (Arc Institute Virtual Cell Challenge).**
 
-> Status: **work in progress** — stage 0 (data checks, null distribution) and the first
-> round of the metric audit are done; sensitivity checks are running.
+> Status: **work in progress** — stage 0 and the metric audit (round 1 plus two follow-up
+> checks) are done. Not yet done: multiple seeds, a full-data reference, validation/test
+> targets, and a comparison with real model submissions.
 
 ## The question
 
@@ -92,6 +93,37 @@ Eleven predictions that contain no (or the wrong) biology were scored with
 - **The MSE clamp hides the cost.** These predictions have 1.6–2.9× the baseline's raw
   MSE, but the score is clamped at 0, so their average ends up positive.
 - PDS differences of ±0.1 are within sampling noise at 150 perturbations.
+
+### Follow-up checks
+
+**The chance-corrected metric penalises the same predictions.** `cell-eval2` also ships
+`direction_fidelity_yield` (chance-corrected); the `vcc2026` preset scores the `_raw`
+variant. On the same reference (median 17 significant genes per real perturbation):
+
+| Prediction | Genes called significant (median) | Raw (scored) | Corrected |
+|---|---|---|---|
+| Control bootstrap | 0 | 0.00 | +0.04 |
+| Mean response ×1 | 0 | 0.06 | −0.11 |
+| Multiplicative noise | 443 | 0.46 | −2.97 |
+| Shuffled labels | 394 | 0.47 | −2.87 |
+| Reads thinned to 25% | 4,641 | 0.51 | −3.02 |
+
+**The effect persists with 4× the cells.** Scale rebuilt on 40 perturbations × 200 cells
+(2,000 controls):
+
+| Prediction | FIDELITY, 50 cells | FIDELITY, 200 cells | AVG, 200 cells |
+|---|---|---|---|
+| Reads thinned to 25% | 0.61 | 0.59 | +0.08 |
+| Multiplicative noise | 0.54 | 0.58 | +0.11 |
+| Shuffled labels | 0.57 | 0.43 | −0.01 |
+| Mean response ×1 (sanity check) | 0.04 | 0.18 | +0.01 |
+| Mean response + target knock-down | 0.02 | 0.14 | 0.00 |
+
+Two caveats from the 200-cell run. The sanity check drifts on FIDELITY (0.18 instead of
+~0), probably because our integer re-emission of the mean response is called significant
+more often than the official baseline's (not verified); read the two "mean response" rows
+against that offset. And the thinned and noisy predictions also beat the baseline on
+JACCARD there (+0.16), so JACCARD does not reliably offset the FIDELITY gain.
 
 Full notes: [`NOTES.md`](NOTES.md).
 
