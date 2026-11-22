@@ -150,6 +150,44 @@ JACCARD there (+0.16), but the seed table shows JACCARD moving by 0.16–0.18 on
 that reversal cannot be separated from noise — whether JACCARD offsets the FIDELITY gain is
 simply unresolved here.
 
+### A real model for comparison
+
+State ST (`arc-state` 0.11.1) trained from scratch on this data — 200 perturbations,
+32,474 cells, 2,000 HVGs, `output_space=all`, no pretrained weights — then scored on a
+**validation-split** reference (50 perturbations the ground-truth cells of which the model
+never saw), alongside the same junk predictions on the same scale:
+
+| Prediction | FIDELITY | REACH | PDS | AVG | Genes called significant (median) |
+|---|---|---|---|---|---|
+| **State ST** | **0.09** | **0.09** | 0.08 | **0.01** | **0** (mean 1.8) |
+| Reads thinned to 25% | **0.64** | −0.12 | 0.16 | **0.07** | 4,641 |
+| Shuffled labels | **0.53** | −0.04 | 0.11 | **0.06** | 394 |
+| Multiplicative noise | **0.54** | −0.03 | −0.00 | **0.04** | 443 |
+| Mean response ×1 (sanity check) | −0.02 | −0.07 | 0.05 | −0.01 | 0 |
+| Control bootstrap | −0.01 | −0.09 | −0.03 | −0.04 | 0 |
+
+Real data has a median of 15 significant genes per perturbation (mean 487).
+
+The model's sign agreement on the genes it does call is **0.58**, *higher* than the junk
+predictions' 0.51 — and it is the only prediction with a positive REACH. It still scores
+0.09 on FIDELITY, because `k / max(n_pred, n_conf)` is dominated by how many genes a
+prediction calls: call thousands and coin-flip signs give ~0.5; call none and even perfect
+signs give ~0.
+
+**What this does and does not show.** This model ran 2,000 of the official 40,000 steps
+(local CPU: ~770 steps/hour, so 40,000 would take ~52 hours), and under-training plausibly
+over-smooths predictions and suppresses DE calls. So this is **not** evidence that
+well-trained models lose to noise. What it shows is that the scored metric is governed by
+call volume rather than directional accuracy. Pointing the other way, Arc's own 2026 wrap-up
+reports that entries **over**-called differential expression (340–4,200 genes against 22–44
+measured) — which by this mechanism is itself a source of FIDELITY. So the official
+"over 90% of entries beat the baseline on FIDELITY" admits two readings, real skill or sheer
+volume, and published aggregate scores cannot separate them.
+
+The setting is also easier than the Challenge: State uses one-hot perturbation encoding and
+cannot predict unseen perturbations without a gene-embedding file we could not reach, so the
+held-out unit is cells, not perturbations.
+
 Full notes: [`NOTES.md`](NOTES.md).
 
 ## Reproduce

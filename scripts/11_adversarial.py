@@ -9,13 +9,14 @@
 """
 from __future__ import annotations
 import sys, time
+import os
 from pathlib import Path
 import numpy as np, h5py, pandas as pd, anndata as ad
 from scipy import sparse
 from cell_eval2.noise import noise_block
 
 ROOT = Path(__file__).resolve().parents[1]
-H5 = ROOT/"data/raw/adata_Training.h5ad"
+H5 = Path(os.environ.get("P5_SRC", ROOT/"data/raw/adata_Training.h5ad"))
 REF, OUT = Path(sys.argv[1]), Path(sys.argv[2]); OUT.mkdir(parents=True, exist_ok=True)
 ALL = ["X1","X2_keep75","X2_keep50","X2_keep25","X4_gauss05","X3_a1","X3_a2","X7","X7plus","X5","X6"]
 WANT = sys.argv[3:] or ALL

@@ -10,10 +10,12 @@ import numpy as np, h5py, pandas as pd, anndata as ad
 from scipy import sparse
 
 ROOT = Path(__file__).resolve().parents[1]
-H5 = ROOT/"data/raw/adata_Training.h5ad"
+import os
+H5 = Path(os.environ.get("P5_SRC", ROOT/"data/raw/adata_Training.h5ad"))
+TAG = os.environ.get("P5_TAG", "")
 K, C = int(sys.argv[1]), int(sys.argv[2]); SEED = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 NPERT = int(sys.argv[4]) if len(sys.argv) > 4 else 0
-OUT = ROOT/(f"results/s3/real_K{K}_C{C}" + (f"_P{NPERT}" if NPERT else "") + (f"_s{SEED}" if SEED else "") + ".h5ad"); OUT.parent.mkdir(parents=True, exist_ok=True)
+OUT = ROOT/(f"results/s3/real{TAG}_K{K}_C{C}" + (f"_P{NPERT}" if NPERT else "") + (f"_s{SEED}" if SEED else "") + ".h5ad"); OUT.parent.mkdir(parents=True, exist_ok=True)
 t0 = time.time(); rng = np.random.default_rng(SEED)
 
 with h5py.File(H5, "r") as f:
@@ -22,7 +24,7 @@ with h5py.File(H5, "r") as f:
     bcat = dec(f["obs/batch/categories"][:]); bcode = f["obs/batch/codes"][:]
     gcat = dec(f["obs/guide_id/categories"][:]); gcode = f["obs/guide_id/codes"][:]
     cells = dec(f["obs/_index"][:]); genes = dec(f["var/_index"][:])
-    gene_id = dec(f["var/gene_id"][:])
+    gene_id = dec(f["var/gene_id"][:]) if "gene_id" in f["var"] else genes  # val/test 无此列
     ci = tcat.index("non-targeting")
     counts = np.bincount(tcode, minlength=len(tcat))
     keep_g = set(range(len(tcat)))
