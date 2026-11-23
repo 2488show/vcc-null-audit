@@ -20,3 +20,6 @@ results/s3/**/*progress
 results/s3/**/baseline_meta.json
 results/s3/**/anchor_meta.json
 results/s3/**/manifest.json
+data/st/
+.venv-state/
+runs/

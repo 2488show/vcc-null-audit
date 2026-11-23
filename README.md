@@ -159,7 +159,8 @@ never saw), alongside the same junk predictions on the same scale:
 
 | Prediction | FIDELITY | REACH | PDS | AVG | Genes called significant (median) |
 |---|---|---|---|---|---|
-| **State ST** | **0.09** | **0.09** | 0.08 | **0.01** | **0** (mean 1.8) |
+| **State ST, 40,000 steps** | **0.87** | **0.93** | 0.83 | **0.63** | **851** (mean 1,565) |
+| State ST, 2,000 steps | 0.09 | 0.09 | 0.08 | 0.01 | 0 (mean 1.8) |
 | Reads thinned to 25% | **0.64** | −0.12 | 0.16 | **0.07** | 4,641 |
 | Shuffled labels | **0.53** | −0.04 | 0.11 | **0.06** | 394 |
 | Multiplicative noise | **0.54** | −0.03 | −0.00 | **0.04** | 443 |
@@ -168,21 +169,30 @@ never saw), alongside the same junk predictions on the same scale:
 
 Real data has a median of 15 significant genes per perturbation (mean 487).
 
-The model's sign agreement on the genes it does call is **0.58**, *higher* than the junk
-predictions' 0.51 — and it is the only prediction with a positive REACH. It still scores
-0.09 on FIDELITY, because `k / max(n_pred, n_conf)` is dominated by how many genes a
-prediction calls: call thousands and coin-flip signs give ~0.5; call none and even perfect
-signs give ~0.
+**Training to the official 40,000 steps changes the picture** (local Apple-silicon GPU, 20 h,
+~0.55 steps/s; the 2,000-step row above is the earlier, under-trained run). The fully trained
+model scores 0.63 overall against 0.01, calls a mean of 1,565 genes significant (median 851;
+real data: mean 487, median 15) and its FIDELITY rises from 0.09 to 0.87. That is the
+prediction made from the 2,000-step run: "talking little" came from under-training, and once the
+model calls hundreds of genes the metric rewards it. It now also beats all three junk
+predictions on every headline score (0.63 vs 0.04–0.07).
 
-**What this does and does not show.** This model ran 2,000 of the official 40,000 steps
-(local CPU: ~770 steps/hour, so 40,000 would take ~52 hours), and under-training plausibly
-over-smooths predictions and suppresses DE calls. So this is **not** evidence that
-well-trained models lose to noise. What it shows is that the scored metric is governed by
-call volume rather than directional accuracy. Pointing the other way, Arc's own 2026 wrap-up
-reports that entries **over**-called differential expression (340–4,200 genes against 22–44
-measured) — which by this mechanism is itself a source of FIDELITY. So the official
-"over 90% of entries beat the baseline on FIDELITY" admits two readings, real skill or sheer
-volume, and published aggregate scores cannot separate them.
+Two things keep this from being a clean win. First, the model now **over-calls** by about 3×
+(mean 1,565 vs 487), the same direction as the Challenge entries Arc described, and the
+chance-corrected FIDELITY is **negative** (−1.84; the 2,000-step model: −0.63), so the corrected
+metric still penalises the volume. Second, the sign agreement on called genes is 0.73 (junk
+predictions: 0.51), which is real signal, but the scored FIDELITY mixes signal and volume and
+this experiment cannot separate how much each contributes. So: a well-trained model beats noise
+here, the gap between "model" and "junk" comes mainly from training, and the call-volume
+mechanism of the metric still stands.
+
+**Caveats for the 40,000-step numbers.** (i) The model emitted 1,813 predicted values above the
+largest value in the training data (log1p 14.0 against 6.83), which made 380 cells exceed the
+scorer's count limit; predictions were clipped to the training range (8,476 values clipped, with
+`ST_CLIP=6.8272` in `scripts/29_score_state.py`) before scoring. (ii) One training run, one
+seed, no repeat. (iii) Scores of PDS 0.83 and NMAE 1.09 are close to or above the replicate
+level (1.0 on this scale); this is the cell-held-out setting, not the Challenge's unseen
+perturbations, so the model has seen each of these perturbations in training.
 
 The setting is also easier than the Challenge: State uses one-hot perturbation encoding and
 cannot predict unseen perturbations without a gene-embedding file we could not reach, so the

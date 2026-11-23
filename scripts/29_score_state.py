@@ -1,6 +1,7 @@
 """把 ST 的预测整理成与 VAL 参考集同结构的整数计数 h5ad，供 cell-eval2 打分。"""
 from __future__ import annotations
 from pathlib import Path
+import os
 import numpy as np, anndata as ad, pandas as pd
 from scipy import sparse
 
@@ -19,7 +20,11 @@ print("组数:", len(set(lab)), "| 每组细胞数 中位", int(np.median(pd.Ser
 
 # ST 的输出在 log1p 空间（训练输入即 log1p，每细胞归一化到 53418.5）：
 # 先 expm1 还原为计数尺度，再随机舍入成整数，保持期望。
-X = np.expm1(np.clip(X, 0, None))
+# 训练集 log1p 最大值 6.83；40k 步模型有 1,813 个预测值 > 11（最大 14.0），使 380 个细胞的总计数 > 1e6，
+# 超过评测器的尺度上限。ST_CLIP 把预测截到训练数据的取值范围（2,000 步模型无需，默认不截）。
+CLIP = float(os.environ.get("ST_CLIP", "inf"))
+print(f"截断上限 {CLIP}；被截断的预测值 {(X > CLIP).sum()} 个")
+X = np.expm1(np.clip(X, 0, CLIP))
 fl = np.floor(X); X = fl + (rng.random(X.shape) < (X - fl))
 X = X.astype(np.float32)
 a = ad.AnnData(X=sparse.csr_matrix(X),
